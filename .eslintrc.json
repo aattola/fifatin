@@ -1,0 +1,17 @@
+{
+  "extends": [
+    //"plugin:@typescript-eslint/eslint-recommended",
+    //"plugin:@typescript-eslint/recommended",
+    "airbnb",
+    "airbnb-typescript",
+    "prettier",
+    "plugin:prettier/recommended"
+  ],
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "project": "./tsconfig.json"
+  },
+  "rules": {
+    "import/prefer-default-export": "off"
+  }
+}

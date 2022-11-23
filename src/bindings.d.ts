@@ -1,0 +1,7 @@
+export {}
+
+declare global {
+  const ABLY_KEY: string
+  // const MY_SECRET: string
+  // const data: KVNamespace
+}

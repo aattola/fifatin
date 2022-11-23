@@ -1,0 +1,12 @@
+name="fifatin"
+main="src/index.ts"
+
+compatibility_date = "2022-10-12"
+
+kv_namespaces = [
+  { binding = "data", id = "f78bd84031d8443ebe835987a3db6bd9", preview_id = "4bb5e9ce9ca24ded9fa0ad5cf9263a57" }
+]
+
+[triggers]
+crons = ["*/1 * * * *"]
+
