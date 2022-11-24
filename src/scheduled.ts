@@ -12,9 +12,6 @@ async function scheduled(
   const data = await gamesToday()
   await env.data.put("games", JSON.stringify(data))
 
-  let ohi: string[] = JSON.parse((await env.data.get("ohi")) || "[]")
-  let aloitus: string[] = JSON.parse((await env.data.get("aloitus")) || "[]")
-
   data.Results.forEach(async (game) => {
     const date = add(new Date(game.Date), { hours: 0 })
     const startTimestamp = getUnixTime(date)
@@ -24,10 +21,15 @@ async function scheduled(
       if (game.MatchStatus !== 0)
         return console.log("match status !== nolla (eli peli meneillään)")
 
+      let ohi: string[] = JSON.parse((await env.data.get("ohi")) || "[]")
       if (ohi.includes(game.IdMatch))
         return console.log("ilmoitettu jo ohi", game.IdMatch)
 
-      console.log("peli ohi")
+      const found = ohi.filter((a) => a === game.IdMatch)
+      if (found.length !== 0)
+        return console.log("ilmoitettu jo ohi (filter)", game.IdMatch)
+
+      console.log("peli ohi", ohi)
       ohi = [...ohi, game.IdMatch]
       env.data.put("ohi", JSON.stringify(ohi))
       return publishToAbly(
@@ -52,6 +54,10 @@ async function scheduled(
     console.log(seconds, "seconds", date, new Date())
 
     if (seconds < 90) {
+      let aloitus: string[] = JSON.parse(
+        (await env.data.get("aloitus")) || "[]"
+      )
+
       if (aloitus.includes(game.IdMatch))
         return console.log("ilmoitettu jo alkaminen", game.IdMatch)
 
