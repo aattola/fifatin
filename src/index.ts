@@ -1,9 +1,14 @@
 import { Hono } from "hono"
+import { cache } from "hono/cache"
 import { getGame } from "./fifa"
 import { scheduled } from "./scheduled"
 import { Bindings } from "./types/general"
 
 const app = new Hono<{ Bindings: Bindings }>()
+app.get(
+  "/peli/*",
+  cache({ cacheName: "peli-cache", cacheControl: "max-age=900" }) // 15min cache
+)
 
 app.get("/", async (c) => {
   const { data } = c.env
