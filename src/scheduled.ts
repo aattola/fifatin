@@ -65,6 +65,7 @@ async function scheduled(
 
       aloitus = [...aloitus, game.IdMatch]
       env.data.put("aloitus", JSON.stringify(aloitus))
+      console.log("Ilmoitetaan alkamisesta... ", game.IdMatch)
       return publishToAbly(
         "peliAlkaa",
         {
