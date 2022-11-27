@@ -14,7 +14,7 @@ app.get("/", async (c) => {
   const { data } = c.env
   const games = await data.get("games")
 
-  return c.json(JSON.parse(games, null, 2))
+  return c.json(JSON.parse(games || "[]"))
 })
 
 app.get("/peli/:id", async (c) => {

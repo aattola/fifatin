@@ -1,5 +1,6 @@
 import { isPast, differenceInSeconds, add, getUnixTime } from "date-fns"
 import { gamesToday } from "./fifa"
+import { Logger } from "./log"
 import { Bindings } from "./types/general"
 import { publishToAbly } from "./utils"
 
@@ -8,7 +9,9 @@ async function scheduled(
   env: Bindings,
   ctx: { waitUntil: (promise: Promise<any>) => Promise<void> }
 ) {
-  console.log("==============================")
+  const logger = new Logger(env.LOGTAIL)
+
+  logger.info("Scheduled event", { timestamp: event.timeStamp })
   const data = await gamesToday()
   await env.data.put("games", JSON.stringify(data))
 
@@ -19,17 +22,17 @@ async function scheduled(
 
     if (past) {
       if (game.MatchStatus !== 0)
-        return console.log("match status !== nolla (eli peli meneillään)")
+        return logger.info("match status !== nolla (eli peli meneillään)")
 
       let ohi: string[] = JSON.parse((await env.data.get("ohi")) || "[]")
       if (ohi.includes(game.IdMatch))
-        return console.log("ilmoitettu jo ohi", game.IdMatch)
+        return logger.info("ilmoitettu jo ohi", { id: game.IdMatch })
 
       const found = ohi.filter((a) => a === game.IdMatch)
       if (found.length !== 0)
-        return console.log("ilmoitettu jo ohi (filter)", game.IdMatch)
+        return logger.info("ilmoitettu jo ohi (filter)", { id: game.IdMatch })
 
-      console.log("peli ohi", ohi)
+      logger.info("peli ohi " + ohi)
       ohi = [...ohi, game.IdMatch]
       env.data.put("ohi", JSON.stringify(ohi))
       return publishToAbly(
@@ -48,10 +51,10 @@ async function scheduled(
     }
     // ei ole vielä pelattu
 
-    if (game.MatchStatus === 0) return console.log("peli on pelattu jo")
+    if (game.MatchStatus === 0) return logger.info("peli on pelattu jo")
 
     const seconds = differenceInSeconds(date, new Date())
-    console.log(seconds, "seconds", date, new Date())
+    logger.info("seconds " + seconds, { date, now: new Date() })
 
     if (seconds < 90) {
       let aloitus: string[] = JSON.parse(
@@ -59,13 +62,13 @@ async function scheduled(
       )
 
       if (aloitus.includes(game.IdMatch))
-        return console.log("ilmoitettu jo alkaminen", game.IdMatch)
+        return logger.info("ilmoitettu jo alkaminen", { id: game.IdMatch })
 
-      const endDate = add(date, { minutes: 15 })
+      const endDate = add(date, { minutes: 30 })
 
       aloitus = [...aloitus, game.IdMatch]
       env.data.put("aloitus", JSON.stringify(aloitus))
-      console.log("Ilmoitetaan alkamisesta... ", game.IdMatch)
+      logger.info("Ilmoitetaan alkamisesta... ", { id: game.IdMatch })
       return publishToAbly(
         "peliAlkaa",
         {
@@ -81,7 +84,7 @@ async function scheduled(
       )
     }
 
-    console.log("Tulossa vielä tänään", game.IdMatch)
+    logger.info("Tulossa vielä tänään", { id: game.IdMatch })
 
     return null
   })
