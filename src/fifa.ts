@@ -1,4 +1,4 @@
-import { startOfToday, getYear, getMonth, getDate } from "date-fns"
+import { startOfToday, getYear, getMonth, getDate, format } from "date-fns"
 import { Game, Games } from "./types/fifa.d"
 
 async function fetchGames() {
@@ -12,13 +12,12 @@ async function fetchGames() {
 
 async function gamesToday() {
   const result = startOfToday()
-  const from = `${getYear(result)}-${getMonth(result) + 1}-${getDate(
-    result
-  )}T00:00:00Z`
+  const formattedDay = format(result, "dd")
+  const formattedMonth = format(result, "MM")
 
-  const to = `${getYear(result)}-${getMonth(result) + 1}-${getDate(
-    result
-  )}T23:59:59Z`
+  const from = `${getYear(result)}-${formattedMonth}-${formattedDay}T00:00:00Z`
+
+  const to = `${getYear(result)}-${formattedMonth}-${formattedDay}T23:59:59Z`
 
   const response = await fetch(
     `https://api.fifa.com/api/v3/calendar/matches?from=${from}&to=${to}&language=en&count=500&idSeason=255711`
